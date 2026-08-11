@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ] 
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Digital Ocean
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DROPLET_IP }}
+        username: ${{ secrets.DROPLET_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          set -e
+          set -o pipefail
+          
+          cd ${{ secrets.APP_PATH }}
+          
+          git add -A || true
+          git commit -m "dummy commit before pull" || true
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Install dependencies
+          npm install --production
+          
+          # Create/update .env file if needed
+          echo "${{ secrets.ENV_FILE }}" > .env
+          
+          # Restart application with PM2
+          pm2 restart ecosystem.config.json --update-env || pm2 start ecosystem.config.json
+          
+          # Save PM2 configuration
+          pm2 save
