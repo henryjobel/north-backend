@@ -42,6 +42,14 @@ const uploadPdfFile = async (file, folder) => {
   return { public_id: result.public_id, url: result.url };
 };
 
+const uploadGalleryImages = async (files = [], folder) => {
+  const uploaded = [];
+  for (const file of files) {
+    uploaded.push(await uploadImageFile(file, folder));
+  }
+  return uploaded;
+};
+
 const uploadSectionImages = async (files, currentSectionImages = {}) => {
   const uploadedSectionImages = {};
 
@@ -87,12 +95,7 @@ export const createGreenCity = async (req, res) => {
 
     // Gallery images
     if (files?.galleryImages?.length) {
-      const uploaded = await Promise.all(
-        files.galleryImages.map(async (f) => {
-          return uploadImageFile(f, "greenCity/gallery");
-        })
-      );
-      data.galleryImages = uploaded;
+      data.galleryImages = await uploadGalleryImages(files.galleryImages, "greenCity/gallery");
     }
 
     // Brochure image
@@ -197,10 +200,7 @@ export const updateGreenCity = async (req, res) => {
           greenCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id))
         );
       }
-      const uploaded = await Promise.all(
-        files.galleryImages.map((f) => uploadImageFile(f, "greenCity/gallery"))
-      );
-      updateData.galleryImages = uploaded;
+      updateData.galleryImages = await uploadGalleryImages(files.galleryImages, "greenCity/gallery");
     }
 
     // Brochure image

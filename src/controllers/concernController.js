@@ -44,7 +44,7 @@ const normalizeConcernPayload = (payload) => {
 export const getAllConcerns = async (_req, res) => {
   try {
     await seedDefaultConcerns();
-    const concerns = await Concern.find().sort({ sortOrder: 1, createdAt: 1 });
+    const concerns = await Concern.find().sort({ sortOrder: 1, createdAt: 1 }).lean();
     sendConcern(res, 200, concerns);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
@@ -56,7 +56,7 @@ export const getConcernByIdOrSlug = async (req, res) => {
     await seedDefaultConcerns();
     const { idOrSlug } = req.params;
     const query = idOrSlug.match(/^[0-9a-fA-F]{24}$/) ? { _id: idOrSlug } : { slug: idOrSlug };
-    const concern = await Concern.findOne(query);
+    const concern = await Concern.findOne(query).lean();
     if (!concern) return res.status(404).json({ status: "fail", message: "Concern not found" });
     sendConcern(res, 200, concern);
   } catch (err) {

@@ -66,4 +66,6 @@ const concernSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+concernSchema.index({ sortOrder: 1, createdAt: 1 });
+
 export const Concern = mongoose.model("Concern", concernSchema);

@@ -14,6 +14,8 @@ const projectSectionImageFields = [
   { name: "bookingImage", maxCount: 1 },
 ];
 
+const cityGalleryImageMaxCount = 20;
+
 const createFileFilter = (fileType) => (req, file, cb) => {
   if (["brochurePdf", "bookingPdf"].includes(file.fieldname)) {
     file.mimetype === "application/pdf" ? cb(null, true) : cb(new Error("Only PDF allowed"), false);
@@ -56,7 +58,7 @@ export const uploadSquareCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "squareCityVideo", maxCount: 1 },
-  { name: "galleryImages", maxCount: 6 },
+  { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },
   { name: "brochurePdf", maxCount: 1 },
   { name: "bookingPdf", maxCount: 1 },
@@ -71,7 +73,7 @@ export const uploadIndustrialCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "industrialCityVideo", maxCount: 1 },
-  { name: "galleryImages", maxCount: 6 },
+  { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },
   { name: "brochurePdf", maxCount: 1 },
   { name: "bookingPdf", maxCount: 1 },
@@ -86,7 +88,7 @@ export const uploadGreenCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "greenCityVideo", maxCount: 1 },
-  { name: "galleryImages", maxCount: 6 },
+  { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },
   { name: "brochurePdf", maxCount: 1 },
   { name: "bookingPdf", maxCount: 1 },

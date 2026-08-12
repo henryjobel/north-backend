@@ -43,6 +43,14 @@ const uploadPdfFile = async (file, folder) => {
   return { public_id: result.public_id, url: result.url };
 };
 
+const uploadGalleryImages = async (files = [], folder) => {
+  const uploaded = [];
+  for (const file of files) {
+    uploaded.push(await uploadImageFile(file, folder));
+  }
+  return uploaded;
+};
+
 const uploadSectionImages = async (files, currentSectionImages = {}) => {
   const uploadedSectionImages = {};
 
@@ -86,12 +94,7 @@ export const createSquareCity = async (req, res) => {
     }
 
     if (files?.galleryImages?.length) {
-      const uploaded = await Promise.all(
-        files.galleryImages.map(async (f) => {
-          return uploadImageFile(f, "squareCity/gallery");
-        })
-      );
-      data.galleryImages = uploaded;
+      data.galleryImages = await uploadGalleryImages(files.galleryImages, "squareCity/gallery");
     }
 
     if (files?.brochureImage?.[0]) {
@@ -190,12 +193,7 @@ export const updateSquareCity = async (req, res) => {
       if (squareCity.galleryImages?.length) {
         await Promise.all(squareCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id)));
       }
-      const uploaded = await Promise.all(
-        files.galleryImages.map(async (f) => {
-          return uploadImageFile(f, "squareCity/gallery");
-        })
-      );
-      updateData.galleryImages = uploaded;
+      updateData.galleryImages = await uploadGalleryImages(files.galleryImages, "squareCity/gallery");
     }
 
     if (files?.brochureImage?.[0]) {
