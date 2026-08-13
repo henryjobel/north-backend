@@ -16,9 +16,15 @@ const projectSectionImageFields = [
 
 const cityGalleryImageMaxCount = 20;
 
+const isPdfFile = (file) =>
+  file.mimetype === "application/pdf" ||
+  file.originalname?.toLowerCase().endsWith(".pdf");
+
+const isImageFile = (file) => file.mimetype?.startsWith("image/");
+
 const createFileFilter = (fileType) => (req, file, cb) => {
   if (["brochurePdf", "bookingPdf"].includes(file.fieldname)) {
-    file.mimetype === "application/pdf" ? cb(null, true) : cb(new Error("Only PDF allowed"), false);
+    isPdfFile(file) ? cb(null, true) : cb(new Error("Only PDF allowed"), false);
     return;
   }
 
@@ -27,12 +33,12 @@ const createFileFilter = (fileType) => (req, file, cb) => {
     allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error("Only images and videos allowed"), false);
   } else if (fileType === "image+pdf") {
     if (file.fieldname === "brochure") {
-      file.mimetype === "application/pdf" ? cb(null, true) : cb(new Error("Only PDF allowed for brochure"), false);
+      isPdfFile(file) ? cb(null, true) : cb(new Error("Only PDF allowed for brochure"), false);
     } else {
-      file.mimetype.startsWith("image") ? cb(null, true) : cb(new Error("Only image files allowed"), false);
+      isImageFile(file) ? cb(null, true) : cb(new Error("Only image files allowed"), false);
     }
   } else {
-    file.mimetype.startsWith("image") ? cb(null, true) : cb(new Error("Only image files allowed"), false);
+    isImageFile(file) ? cb(null, true) : cb(new Error("Only image files allowed"), false);
   }
 };
 

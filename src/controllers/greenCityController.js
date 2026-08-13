@@ -38,8 +38,39 @@ const uploadImageFile = async (file, folder) => {
 };
 
 const uploadPdfFile = async (file, folder) => {
-  const result = await uploadToCloudinary(file.buffer, folder, { resource_type: "raw" });
+  const safeBaseName =
+    file.originalname
+      ?.replace(/\.pdf$/i, "")
+      .replace(/[^a-z0-9_-]+/gi, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase() || "brochure";
+  const result = await uploadToCloudinary(file.buffer, folder, {
+    resource_type: "raw",
+    public_id: `${safeBaseName}-${Date.now()}.pdf`,
+  });
   return { public_id: result.public_id, url: result.url };
+};
+
+const parseAssetField = (body, key) => {
+  const prefix = key.replace(/Asset$/, "");
+  if (body?.[`${prefix}Url`]) {
+    return {
+      public_id: body[`${prefix}PublicId`] || "",
+      url: body[`${prefix}Url`],
+    };
+  }
+
+  if (!body?.[key]) return null;
+  try {
+    const asset = typeof body[key] === "string" ? JSON.parse(body[key]) : body[key];
+    if (!asset?.url) return null;
+    return {
+      public_id: asset.public_id || "",
+      url: asset.url,
+    };
+  } catch {
+    return null;
+  }
 };
 
 const uploadGalleryImages = async (files = [], folder) => {
@@ -105,10 +136,16 @@ export const createGreenCity = async (req, res) => {
 
     if (files?.brochurePdf?.[0]) {
       data.brochurePdf = await uploadPdfFile(files.brochurePdf[0], "greenCity/pdfs");
+    } else {
+      const brochurePdfAsset = parseAssetField(body, "brochurePdfAsset");
+      if (brochurePdfAsset) data.brochurePdf = brochurePdfAsset;
     }
 
     if (files?.bookingPdf?.[0]) {
       data.bookingPdf = await uploadPdfFile(files.bookingPdf[0], "greenCity/pdfs");
+    } else {
+      const bookingPdfAsset = parseAssetField(body, "bookingPdfAsset");
+      if (bookingPdfAsset) data.bookingPdf = bookingPdfAsset;
     }
 
     if (files?.mapImage?.[0]) {
@@ -216,6 +253,14 @@ export const updateGreenCity = async (req, res) => {
         await deleteFromCloudinary(greenCity.brochurePdf.public_id, "raw");
       }
       updateData.brochurePdf = await uploadPdfFile(files.brochurePdf[0], "greenCity/pdfs");
+    } else {
+      const brochurePdfAsset = parseAssetField(body, "brochurePdfAsset");
+      if (brochurePdfAsset) {
+        if (greenCity.brochurePdf?.public_id && greenCity.brochurePdf.public_id !== brochurePdfAsset.public_id) {
+          await deleteFromCloudinary(greenCity.brochurePdf.public_id, "raw");
+        }
+        updateData.brochurePdf = brochurePdfAsset;
+      }
     }
 
     if (files?.bookingPdf?.[0]) {
@@ -223,6 +268,14 @@ export const updateGreenCity = async (req, res) => {
         await deleteFromCloudinary(greenCity.bookingPdf.public_id, "raw");
       }
       updateData.bookingPdf = await uploadPdfFile(files.bookingPdf[0], "greenCity/pdfs");
+    } else {
+      const bookingPdfAsset = parseAssetField(body, "bookingPdfAsset");
+      if (bookingPdfAsset) {
+        if (greenCity.bookingPdf?.public_id && greenCity.bookingPdf.public_id !== bookingPdfAsset.public_id) {
+          await deleteFromCloudinary(greenCity.bookingPdf.public_id, "raw");
+        }
+        updateData.bookingPdf = bookingPdfAsset;
+      }
     }
 
     if (files?.mapImage?.[0]) {
@@ -240,6 +293,8 @@ export const updateGreenCity = async (req, res) => {
     if (updateData.sectionImages) {
       delete updateData.sectionImages;
     }
+    delete updateData.brochurePdfAsset;
+    delete updateData.bookingPdfAsset;
 
     const updatedGreenCity = await GreenCity.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
     res.status(200).json({ status: "success", data: updatedGreenCity });

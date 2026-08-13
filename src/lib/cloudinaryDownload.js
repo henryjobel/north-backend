@@ -18,16 +18,18 @@ export const buildPdfFilename = (...parts) => {
 export const getRawPublicId = (asset) => {
   if (!asset) return null;
   if (typeof asset === "string") return asset;
-  if (asset.public_id) return asset.public_id;
 
   const assetUrl = asset.url || asset.secure_url;
-  if (!assetUrl || !assetUrl.includes("cloudinary.com")) return null;
+  if (!assetUrl || !assetUrl.includes("cloudinary.com")) {
+    return asset.public_id || null;
+  }
 
   try {
     const parts = assetUrl.split("/upload/");
-    return parts[1].replace(/^v\d+\//, "").replace(/\?.*$/, "");
+    const publicIdFromUrl = parts[1].replace(/^v\d+\//, "").replace(/\?.*$/, "");
+    return publicIdFromUrl || asset.public_id || null;
   } catch {
-    return null;
+    return asset.public_id || null;
   }
 };
 

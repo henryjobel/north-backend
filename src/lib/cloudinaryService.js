@@ -17,8 +17,19 @@ cloudinary.config({
  */
 export const uploadToCloudinary = (buffer, folder, options = {}) => {
   return new Promise((resolve, reject) => {
+    const uploadOptions = {
+      folder,
+      resource_type: "image",
+      format: "webp",
+      ...options,
+    };
+
+    if (uploadOptions.resource_type !== "image") {
+      delete uploadOptions.format;
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "auto", ...options },
+      uploadOptions,
       (error, result) => {
         if (error) return reject(error);
         resolve({ url: result.secure_url, public_id: result.public_id });

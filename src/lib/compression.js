@@ -3,6 +3,7 @@ import sharp from "sharp";
 class CompressionService {
   MAX_SIZE_BYTES = 500 * 1024;
   MIN_SIZE_BYTES = 100 * 1024;
+  MAX_WIDTH = 1600;
 
   /**
    * Compresses an image buffer trying to fit it between 100kb and 500kb.
@@ -31,8 +32,8 @@ class CompressionService {
 
     let width =
       options.width ||
-      (metadata.width && metadata.width > 1920 ? 1920 : metadata.width) ||
-      1920;
+      (metadata.width && metadata.width > this.MAX_WIDTH ? this.MAX_WIDTH : metadata.width) ||
+      this.MAX_WIDTH;
 
     let quality = options.quality || 80;
 
@@ -47,8 +48,8 @@ class CompressionService {
     ) {
       quality -= 10;
 
-      if (quality < 50 && width > 1280) {
-        width = 1280;
+      if (quality < 50 && width > 1200) {
+        width = 1200;
         quality = 70;
       }
 
@@ -60,14 +61,14 @@ class CompressionService {
   }
 
   /**
-   * Processes an image buffer by resizing and converting it to JPEG format.
+   * Processes an image buffer by resizing and converting it to WebP format.
    * 
    * @name processImage
    * @method
    * @param {Buffer} buffer - The image buffer to process
    * @param {number} width - Target width for the resized image (images won't be enlarged if smaller)
    * @param {number} quality - JPEG quality setting (1-100)
-   * @returns {Promise<Buffer>} A promise that resolves to the processed image buffer as JPEG format
+   * @returns {Promise<Buffer>} A promise that resolves to the processed image buffer as WebP format
    * 
    * @example
    * // Process an image with specific width and quality
@@ -76,7 +77,7 @@ class CompressionService {
   async processImage(buffer, width, quality) {
     return sharp(buffer)
       .resize({ width, withoutEnlargement: true })
-      .jpeg({ quality })
+      .webp({ quality, effort: 5 })
       .toBuffer();
   }
 }

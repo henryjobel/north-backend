@@ -17,6 +17,13 @@ const sectionImageKeys = [
 
 const keyPhotoKeys = ["basement", "groundFloor", "typicalFloor", "roofFloor"];
 
+const slugify = (value = "") =>
+  String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 // Returns a short-lived signed upload config for direct browser → Cloudinary uploads
 export const getUploadSignature = (req, res) => {
   const timestamp = Math.round(Date.now() / 1000);
@@ -138,7 +145,17 @@ export const getAllProjects = async (req, res) => {
 
 export const getProjectById = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const idOrSlug = req.params.id;
+    let project = null;
+
+    if (mongoose.Types.ObjectId.isValid(idOrSlug)) {
+      project = await Project.findById(idOrSlug);
+    } else {
+      const routeSlug = slugify(idOrSlug);
+      const projects = await Project.find();
+      project = projects.find((item) => slugify(item?.title) === routeSlug);
+    }
+
     if (!project) return res.status(404).json({ status: "fail", message: "Project not found" });
     res.status(200).json({ status: "success", data: project });
   } catch (err) {

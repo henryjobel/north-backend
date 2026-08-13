@@ -41,10 +41,10 @@ const industrialCityDefaults = {
   goalsTitle: "Goals of North South Industrial City",
   mapEyebrow: "EXPLORE THE FUTURE",
   mapTitle: "Industrial City Location Map",
-  bookingEyebrow: "MASTER PLAN & PRICE GUIDE",
+  bookingEyebrow: "MASTER PLAN & BROCHURE",
   bookingTitle: "Review industrial blocks and request your preferred allocation",
   bookingSubtitle:
-    "See the master layout, download the brochure, and book an industrial or support-use plot with the form below.",
+    "Download the project brochure for complete details.",
   overviewParagraph1:
     "North South Group is a market leader in the real estate building and land development sector, gaining strong confidence in housing and industrial development across Bangladesh.",
   overviewParagraph2:
