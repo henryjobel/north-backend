@@ -86,6 +86,46 @@ export const updateConcern = async (req, res) => {
   }
 };
 
+export const reorderConcerns = async (req, res) => {
+  try {
+    const items = Array.isArray(req.body?.items)
+      ? req.body.items
+      : Array.isArray(req.body?.concerns)
+        ? req.body.concerns
+        : [];
+
+    if (!items.length) {
+      return res.status(400).json({ status: "fail", message: "Concern order list is required" });
+    }
+
+    const operations = items
+      .map((item, index) => {
+        const id = typeof item === "string" ? item : item?._id || item?.id;
+        const sortOrder = Number(typeof item === "string" ? index + 1 : item?.sortOrder ?? index + 1);
+
+        if (!id) return null;
+
+        return {
+          updateOne: {
+            filter: { _id: id },
+            update: { $set: { sortOrder: Number.isFinite(sortOrder) ? sortOrder : index + 1 } },
+          },
+        };
+      })
+      .filter(Boolean);
+
+    if (!operations.length) {
+      return res.status(400).json({ status: "fail", message: "Valid concern IDs are required" });
+    }
+
+    await Concern.bulkWrite(operations);
+    const concerns = await Concern.find().sort({ sortOrder: 1, createdAt: 1 }).lean();
+    sendConcern(res, 200, concerns);
+  } catch (err) {
+    res.status(400).json({ status: "fail", message: err.message });
+  }
+};
+
 export const deleteConcern = async (req, res) => {
   try {
     const concern = await Concern.findByIdAndDelete(req.params.id);

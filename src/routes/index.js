@@ -13,6 +13,7 @@ import { squareCityRoutes } from "./squareCityRoutes.js";
 import { userRouters } from "./userRoutes.js";
 import { plotBookingRoutes } from "./plotBookingRoutes.js";
 import { concernRoutes } from "./concernRoutes.js";
+import { menuRoutes } from "./menuRoutes.js";
 
 const router = Router();
 
@@ -31,6 +32,7 @@ router.use("/about", aboutContentRoutes);
 router.use("/health", healthRouter);
 router.use("/plotBooking", plotBookingRoutes);
 router.use("/concern", concernRoutes);
+router.use("/menu", menuRoutes);
 
 
 export default router;

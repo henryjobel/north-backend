@@ -17,6 +17,8 @@ const sectionImageKeys = [
 
 const keyPhotoKeys = ["basement", "groundFloor", "typicalFloor", "roofFloor"];
 
+const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+
 const slugify = (value = "") =>
   String(value)
     .trim()
@@ -108,10 +110,11 @@ export const createProject = async (req, res) => {
     const { body, files } = req;
 
     if (files) {
-      const { image, slideImage, galleryImages, mapLocation, basement, groundFloor, typicalFloor, roofFloor, brochure } = files;
+      const { image, slideImage, galleryImages, projectGalleryImages, mapLocation, basement, groundFloor, typicalFloor, roofFloor, brochure } = files;
       if (image?.length) body.image = await uploadFiles(image, "projects");
       if (slideImage?.length) body.slideImage = await uploadFiles(slideImage, "projects");
       if (galleryImages?.length) body.galleryImages = await uploadFiles(galleryImages, "projects/gallery");
+      if (projectGalleryImages?.length) body.projectGalleryImages = await uploadFiles(projectGalleryImages, "projects/project-gallery");
       if (mapLocation?.length) body.mapLocation = await uploadFiles(mapLocation, "projects");
       if (brochure?.[0]) body.brochure = await uploadProjectBrochure(brochure[0]);
       body.keyPhotos = {
@@ -177,8 +180,8 @@ export const updateProject = async (req, res) => {
       location: body.location ?? project.location,
       status: body.status ?? project.status,
     };
-    if (body.description) updateData.description = typeof body.description === "string" ? JSON.parse(body.description) : body.description;
-    if (body.sectionImages) {
+    if (hasOwn(body, "description")) updateData.description = typeof body.description === "string" ? JSON.parse(body.description) : body.description;
+    if (hasOwn(body, "sectionImages")) {
       const incomingSectionImages = typeof body.sectionImages === "string" ? JSON.parse(body.sectionImages) : body.sectionImages;
       updateData.sectionImages = { ...(project.sectionImages?.toObject?.() || project.sectionImages || {}) };
 
@@ -193,15 +196,16 @@ export const updateProject = async (req, res) => {
         updateData.sectionImages[key] = nextUrl;
       });
     }
-    if (body.specs) updateData.specs = typeof body.specs === "string" ? JSON.parse(body.specs) : body.specs;
+    if (hasOwn(body, "specs")) updateData.specs = typeof body.specs === "string" ? JSON.parse(body.specs) : body.specs;
 
     // Handle direct Cloudinary URLs sent as JSON from frontend (no file upload)
-    if (body.image) updateData.image = body.image;
-    if (body.slideImage) updateData.slideImage = body.slideImage;
-    if (body.galleryImages) updateData.galleryImages = body.galleryImages;
-    if (body.mapLocation) updateData.mapLocation = body.mapLocation;
-    if (body.brochure) updateData.brochure = body.brochure;
-    if (body.keyPhotos) {
+    if (hasOwn(body, "image")) updateData.image = body.image;
+    if (hasOwn(body, "slideImage")) updateData.slideImage = body.slideImage;
+    if (hasOwn(body, "galleryImages")) updateData.galleryImages = body.galleryImages;
+    if (hasOwn(body, "projectGalleryImages")) updateData.projectGalleryImages = body.projectGalleryImages;
+    if (hasOwn(body, "mapLocation")) updateData.mapLocation = body.mapLocation;
+    if (hasOwn(body, "brochure")) updateData.brochure = body.brochure;
+    if (hasOwn(body, "keyPhotos")) {
       const incomingKeyPhotos = typeof body.keyPhotos === "string" ? JSON.parse(body.keyPhotos) : body.keyPhotos;
       updateData.keyPhotos = { ...(project.keyPhotos?.toObject?.() || project.keyPhotos || {}) };
 
@@ -229,6 +233,10 @@ export const updateProject = async (req, res) => {
       if (files.galleryImages?.length) {
         project.galleryImages?.forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
         updateData.galleryImages = await uploadFiles(files.galleryImages, "projects/gallery");
+      }
+      if (files.projectGalleryImages?.length) {
+        project.projectGalleryImages?.forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
+        updateData.projectGalleryImages = await uploadFiles(files.projectGalleryImages, "projects/project-gallery");
       }
       if (files.mapLocation?.length) {
         project.mapLocation?.forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
@@ -258,7 +266,7 @@ export const deleteProject = async (req, res) => {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ status: "fail", message: "Project not found" });
 
-    [...(project.image || []), ...(project.slideImage || []), ...(project.galleryImages || []), ...(project.mapLocation || [])].forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
+    [...(project.image || []), ...(project.slideImage || []), ...(project.galleryImages || []), ...(project.projectGalleryImages || []), ...(project.mapLocation || [])].forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
     Object.values(project.keyPhotos || {}).forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
     Object.values(project.sectionImages || {}).forEach((u) => deleteFromCloudinary(getPublicIdFromUrl(u)));
     deleteFromCloudinary(getPublicIdFromUrl(project.brochure), getResourceTypeFromUrl(project.brochure));

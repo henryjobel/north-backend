@@ -103,7 +103,7 @@ export const uploadGreenCityAllFiles = multer({
 ]);
 export const uploadsquareCityVideoFiles = createUploadMiddleware({ fieldName: "squareCityVideo", fileType: "image+video" });
 export const uploadNewsEventFiles = createUploadMiddleware({ fieldName: ["image"], fileType: "image" });
-export const uploadProjectFiles = createUploadMiddleware({ fieldName: ["image","slideImage","galleryImages","mapLocation","basement","groundFloor","typicalFloor","roofFloor","brochure"], fileType: "image+pdf" });
+export const uploadProjectFiles = createUploadMiddleware({ fieldName: ["image","slideImage","galleryImages","projectGalleryImages","mapLocation","basement","groundFloor","typicalFloor","roofFloor","brochure"], fileType: "image+pdf" });
 export const uploadProfilePic = createUploadMiddleware({ fieldName: "profilePic", fileType: "image" });
 export const uploadPartners = createUploadMiddleware({ fieldName: "partnersImage", fileType: "image" });
 export const parseFormData = multer().none();

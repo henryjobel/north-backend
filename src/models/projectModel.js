@@ -3,9 +3,9 @@
 import mongoose from "mongoose";
 
 const descriptionSchema = new mongoose.Schema({
-  generalFeature: { type: String, required: true },
-  elevator: { type: String, required: true },
-  bathroomFeature: { type: String, required: true },
+  generalFeature: { type: String, default: "" },
+  elevator: { type: String, default: "" },
+  bathroomFeature: { type: String, default: "" },
   kitchenDoor: { type: String },
   maidsToilet: { type: String },
 });
@@ -43,6 +43,7 @@ const projectSchema = new mongoose.Schema(
     image: [{ type: String }], // array of images
     slideImage: [{ type: String }], // for slider
     galleryImages: [{ type: String }], // for visual tour photo gallery
+    projectGalleryImages: [{ type: String }], // for public project gallery section
     mapLocation: [{ type: String }], // array of map images
     keyPhotos: {
     basement: String,
