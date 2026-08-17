@@ -48,8 +48,6 @@ const seedMenuItems = async () => {
           {
             $setOnInsert: {
               key: `concern-${concern._id}`,
-              label: concern.title,
-              to: route,
               external: false,
               isVisible: true,
               sortOrder: nextOrder++,
