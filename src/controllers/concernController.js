@@ -1,20 +1,28 @@
-import { Concern } from "../models/concernModel.js";
+import { Concern, DeletedConcern } from "../models/concernModel.js";
 import { defaultConcerns } from "../data/defaultConcerns.js";
+import { MenuItem } from "../models/menuItemModel.js";
 
 let seedPromise = null;
 
 const seedDefaultConcerns = async () => {
   if (seedPromise) return seedPromise;
 
-  seedPromise = Promise.all(
-    defaultConcerns.map((concern) =>
+  seedPromise = (async () => {
+    const deletedSlugs = await DeletedConcern.distinct("slug");
+    const deletedSlugSet = new Set(deletedSlugs);
+
+    await Promise.all(
+      defaultConcerns
+      .filter((concern) => !deletedSlugSet.has(concern.slug))
+      .map((concern) =>
       Concern.updateOne(
         { slug: concern.slug },
         { $setOnInsert: concern },
         { upsert: true }
       )
     )
-  ).catch((err) => {
+    );
+  })().catch((err) => {
     seedPromise = null;
     throw err;
   });
@@ -23,7 +31,43 @@ const seedDefaultConcerns = async () => {
 };
 
 const sendConcern = (res, statusCode, data) => {
-  res.status(statusCode).json({ status: "success", data });
+  const payload = typeof data?.toObject === "function" ? data.toObject() : data;
+  res.status(statusCode).json({ status: "success", data: normalizeLtdText(payload) });
+};
+
+const skipLtdNormalizeKeys = new Set([
+  "_id",
+  "id",
+  "slug",
+  "routePath",
+  "to",
+  "href",
+  "url",
+  "image",
+  "heroImage",
+  "aboutImage",
+  "galleryImages",
+  "heroSliderImages",
+  "createdAt",
+  "updatedAt",
+]);
+
+const isPlainObject = (value) => {
+  if (!value || typeof value !== "object") return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+const normalizeLtdText = (value, key = "") => {
+  if (skipLtdNormalizeKeys.has(key)) return value;
+  if (typeof value === "string") return value.replace(/\bltd\b/gi, "L.T.D");
+  if (Array.isArray(value)) return value.map((entry) => normalizeLtdText(entry, key));
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([entryKey, entry]) => [entryKey, normalizeLtdText(entry, entryKey)])
+    );
+  }
+  return value;
 };
 
 const slugify = (value = "") =>
@@ -66,7 +110,11 @@ export const getConcernByIdOrSlug = async (req, res) => {
 
 export const createConcern = async (req, res) => {
   try {
-    const concern = await Concern.create(normalizeConcernPayload(req.body));
+    const payload = normalizeConcernPayload(req.body);
+    if (payload.slug) {
+      await DeletedConcern.deleteOne({ slug: payload.slug });
+    }
+    const concern = await Concern.create(payload);
     sendConcern(res, 201, concern);
   } catch (err) {
     res.status(400).json({ status: "fail", message: err.message });
@@ -75,7 +123,11 @@ export const createConcern = async (req, res) => {
 
 export const updateConcern = async (req, res) => {
   try {
-    const concern = await Concern.findByIdAndUpdate(req.params.id, normalizeConcernPayload(req.body), {
+    const payload = normalizeConcernPayload(req.body);
+    if (payload.slug) {
+      await DeletedConcern.deleteOne({ slug: payload.slug });
+    }
+    const concern = await Concern.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     });
@@ -130,6 +182,50 @@ export const deleteConcern = async (req, res) => {
   try {
     const concern = await Concern.findByIdAndDelete(req.params.id);
     if (!concern) return res.status(404).json({ status: "fail", message: "Concern not found" });
+
+    const routeCandidates = [
+      concern.routePath,
+      concern.slug ? `/concern/${concern.slug}` : "",
+    ].filter(Boolean);
+    const labelCandidates = [
+      concern.title,
+      normalizeLtdText(concern.title),
+    ].filter(Boolean);
+
+    if (defaultConcerns.some((item) => item.slug === concern.slug)) {
+      await DeletedConcern.updateOne(
+        { slug: concern.slug },
+        {
+          $set: {
+            title: concern.title,
+            routePath: concern.routePath,
+            deletedAt: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+      seedPromise = null;
+    }
+
+    await Promise.all([
+      MenuItem.deleteMany({
+        $or: [
+          { key: `concern-${concern._id}` },
+          { source: "concern", to: { $in: routeCandidates } },
+        ],
+      }),
+      MenuItem.updateMany(
+        {
+          source: "static",
+          $or: [
+            { to: { $in: routeCandidates } },
+            { label: { $in: labelCandidates } },
+          ],
+        },
+        { $set: { isVisible: false } }
+      ),
+    ]);
+
     res.status(204).json({ status: "success", data: null });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });

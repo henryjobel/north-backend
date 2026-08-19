@@ -69,3 +69,22 @@ const concernSchema = new mongoose.Schema(
 concernSchema.index({ sortOrder: 1, createdAt: 1 });
 
 export const Concern = mongoose.model("Concern", concernSchema);
+
+const deletedConcernSchema = new mongoose.Schema(
+  {
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
+    title: { type: String, trim: true },
+    routePath: { type: String, trim: true },
+    deletedAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+export const DeletedConcern = mongoose.model("DeletedConcern", deletedConcernSchema);

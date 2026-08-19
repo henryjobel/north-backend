@@ -30,6 +30,7 @@ const leaderSchema = new mongoose.Schema(
     id: { type: String, trim: true, default: "" },
     name: { type: String, trim: true, default: "" },
     role: { type: String, trim: true, default: "" },
+    description: { type: String, trim: true, default: "" },
     img: { type: String, trim: true, default: "" },
   },
   { _id: false }
