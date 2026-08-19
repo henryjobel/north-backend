@@ -7,12 +7,14 @@ import {
   reorderConcerns,
   updateConcern,
 } from "../controllers/concernController.js";
+import { isAuthenticated } from "../middleware/isAuthenticated.js";
+import { restrictTo } from "../middleware/restrictTo.js";
 
 const router = Router();
 
-router.route("/").get(getAllConcerns).post(createConcern);
-router.patch("/reorder", reorderConcerns);
-router.route("/:id").put(updateConcern).delete(deleteConcern);
+router.route("/").get(getAllConcerns).post(isAuthenticated, restrictTo("admin"), createConcern);
+router.patch("/reorder", isAuthenticated, restrictTo("admin"), reorderConcerns);
+router.route("/:id").put(isAuthenticated, restrictTo("admin"), updateConcern).delete(isAuthenticated, restrictTo("admin"), deleteConcern);
 router.get("/:idOrSlug", getConcernByIdOrSlug);
 
 export const concernRoutes = router;

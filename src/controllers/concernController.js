@@ -78,9 +78,16 @@ const slugify = (value = "") =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const normalizeRoutePath = (value = "") => {
+  const routePath = String(value || "").trim();
+  if (!routePath) return "";
+  return routePath.startsWith("/") ? routePath : `/${routePath}`;
+};
+
 const normalizeConcernPayload = (payload) => {
   const next = { ...payload };
   if (next.slug) next.slug = slugify(next.slug);
+  if (next.routePath) next.routePath = normalizeRoutePath(next.routePath);
   if (!next.routePath && next.slug) next.routePath = `/concern/${next.slug}`;
   return next;
 };
@@ -99,7 +106,18 @@ export const getConcernByIdOrSlug = async (req, res) => {
   try {
     await seedDefaultConcerns();
     const { idOrSlug } = req.params;
-    const query = idOrSlug.match(/^[0-9a-fA-F]{24}$/) ? { _id: idOrSlug } : { slug: idOrSlug };
+    const decodedParam = decodeURIComponent(String(idOrSlug || "").trim());
+    const routePath = normalizeRoutePath(decodedParam);
+    const query = decodedParam.match(/^[0-9a-fA-F]{24}$/)
+      ? { _id: decodedParam }
+      : {
+          $or: [
+            { slug: slugify(decodedParam) },
+            { routePath: decodedParam },
+            { routePath },
+            { routePath: `/concern/${slugify(decodedParam)}` },
+          ],
+        };
     const concern = await Concern.findOne(query).lean();
     if (!concern) return res.status(404).json({ status: "fail", message: "Concern not found" });
     sendConcern(res, 200, concern);
