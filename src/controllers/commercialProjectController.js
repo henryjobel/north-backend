@@ -29,7 +29,7 @@ const singleImageFields = [
 ];
 
 const uploadImageFile = async (file, folder) => {
-  const compressedBuffer = await compressionService.compressImage(file.buffer);
+  const compressedBuffer = await compressionService.compress(file.buffer);
   const result = await uploadToCloudinary(compressedBuffer, folder);
   return { public_id: result.public_id, url: result.url };
 };
@@ -37,7 +37,7 @@ const uploadImageFile = async (file, folder) => {
 const uploadGalleryImages = async (files, folder) => {
   return await Promise.all(
     files.map(async (file) => {
-      const compressedBuffer = await compressionService.compressImage(file.buffer);
+      const compressedBuffer = await compressionService.compress(file.buffer);
       const result = await uploadToCloudinary(compressedBuffer, folder);
       return { public_id: result.public_id, url: result.url };
     })

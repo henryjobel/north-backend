@@ -4,6 +4,7 @@ dotenv.config();
 import mongoose from "mongoose";
 import { SquareCity } from "./models/squareCityModel.js";
 import { IndustrialCity } from "./models/industrialCityModel.js";
+import { HomeSlider } from "./models/homeSliderModel.js";
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -74,6 +75,37 @@ const industrialCityDefaults = {
   ],
 };
 
+const homeSliderDefaults = [
+  {
+    eyebrow: "North South Group",
+    title: "Redefining Modern Living",
+    subtitle: "Residential, hospitality, and land development projects shaped around trust, location, and long-term value.",
+    sortOrder: 1,
+    image: { public_id: "static/home-slider-1", url: "/assets/Hotel.png" },
+  },
+  {
+    eyebrow: "Land Development",
+    title: "Invest For A Better Tomorrow",
+    subtitle: "Planned communities and strategic land opportunities for buyers, investors, and landowners.",
+    sortOrder: 2,
+    image: { public_id: "static/home-slider-2", url: "/assets/Land1.png" },
+  },
+  {
+    eyebrow: "Trusted Partnership",
+    title: "Build Your Sanctuary With Credibility",
+    subtitle: "A practical route for landowners and families looking for reliable real estate development.",
+    sortOrder: 3,
+    image: { public_id: "static/home-slider-3", url: "/assets/Land2.png" },
+  },
+  {
+    eyebrow: "Real Estate",
+    title: "A New Standard Of Living",
+    subtitle: "Homes and townships designed for comfort, connectivity, and everyday convenience.",
+    sortOrder: 4,
+    image: { public_id: "static/home-slider-4", url: "/assets/Apartment.jpg" },
+  },
+];
+
 // ── Seed helper ────────────────────────────────────────────────────────────
 
 async function seedModel(Model, defaults, label) {
@@ -121,6 +153,7 @@ async function main() {
 
   await seedModel(SquareCity, squareCityDefaults, "SquareCity");
   await seedModel(IndustrialCity, industrialCityDefaults, "IndustrialCity");
+  await seedModel(HomeSlider, homeSliderDefaults, "HomeSlider");
 
   console.log("\nDone.");
   await mongoose.disconnect();
