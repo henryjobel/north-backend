@@ -2,16 +2,16 @@ import { Concern, DeletedConcern } from "../models/concernModel.js";
 import { MenuItem } from "../models/menuItemModel.js";
 
 const defaultConcernMenuItems = [
-  { key: "static-north-south-consortium-ltd", concernSlug: "north-south-consortium-ltd", label: "North South Consortium L.T.D", to: "/northSouthConsortiumLtd", sortOrder: 1 },
-  { key: "static-northsouth-green-city-ltd", label: "Northsouth Green City L.T.D", to: "/greenCity", sortOrder: 2 },
+  { key: "static-north-south-consortium-ltd", concernSlug: "north-south-consortium-ltd", label: "North South Consortium Ltd.", to: "/northSouthConsortiumLtd", sortOrder: 1 },
+  { key: "static-northsouth-green-city-ltd", label: "Northsouth Green City Ltd.", to: "/greenCity", sortOrder: 2 },
   { key: "static-northsouth-industrial-city", label: "Northsouth Industrial City", to: "/industrialCity", sortOrder: 3 },
   { key: "static-northsouth-square-city", label: "Northsouth Square City", to: "/squareCity", sortOrder: 4 },
   { key: "static-purbachal-nirapad-valley", concernSlug: "purbachal-nirapad-valley", label: "Purbachal Nirapad Valley", to: "/purbachalNirapadValley", sortOrder: 5 },
   { key: "static-northsouth-duplex-home", concernSlug: "concept-details", label: "Northsouth Duplex Home", to: "/conceptDetails", sortOrder: 6 },
-  { key: "static-northsouth-farms-ltd", concernSlug: "northsouth-farms-ltd", label: "Northsouth Farms L.T.D", to: "/northsouthFarmsLtd", sortOrder: 7 },
+  { key: "static-northsouth-farms-ltd", concernSlug: "northsouth-farms-ltd", label: "Northsouth Farms Ltd.", to: "/northsouthFarmsLtd", sortOrder: 7 },
   { key: "static-northsouth-garments", concernSlug: "northsouth-garments", label: "Northsouth Garments", to: "/northsouthGarments", sortOrder: 8 },
-  { key: "static-dailyadin", label: "Daily Adin Press Media L.T.D", href: "https://www.dailyadin.com/", external: true, sortOrder: 9 },
-  { key: "static-titanic-bay-hotel-resort-ltd", label: "Titanic Bay Hotel & Resort L.T.D", href: "https://www.titanicbay.com/", external: true, sortOrder: 10 },
+  { key: "static-dailyadin", label: "Daily Adin Press Media Ltd.", href: "https://www.dailyadin.com/", external: true, sortOrder: 9 },
+  { key: "static-titanic-bay-hotel-resort-ltd", label: "Titanic Bay Hotel & Resort Ltd.", href: "https://www.titanicbay.com/", external: true, sortOrder: 10 },
 ];
 
 let seedPromise = null;

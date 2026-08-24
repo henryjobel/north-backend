@@ -60,7 +60,7 @@ const isPlainObject = (value) => {
 
 const normalizeLtdText = (value, key = "") => {
   if (skipLtdNormalizeKeys.has(key)) return value;
-  if (typeof value === "string") return value.replace(/\bltd\b/gi, "L.T.D");
+  if (typeof value === "string") return value.replace(/\bltd\b/gi, "Ltd.");
   if (Array.isArray(value)) return value.map((entry) => normalizeLtdText(entry, key));
   if (isPlainObject(value)) {
     return Object.fromEntries(
