@@ -95,6 +95,7 @@ const apiModules = [
   { name: "Green City", path: "/api/v1/greenCity", note: "Banner project data" },
   { name: "Square City", path: "/api/v1/squareCity", note: "Banner project data" },
   { name: "Industrial City", path: "/api/v1/industrialCity", note: "Banner project data" },
+  { name: "Commercial Project", path: "/api/v1/commercialProject", note: "Commercial project data" },
   { name: "News & Events", path: "/api/v1/newsEvent", note: "Public news and event posts" },
   { name: "Partners", path: "/api/v1/partners", note: "Concern and partner logos" },
   { name: "About", path: "/api/v1/about", note: "About page content" },

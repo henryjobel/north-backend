@@ -101,6 +101,21 @@ export const uploadGreenCityAllFiles = multer({
   { name: "mapImage", maxCount: 1 },
   ...projectSectionImageFields,
 ]);
+// Multi-field upload for CommercialProject
+export const uploadCommercialProjectAllFiles = multer({
+  storage: memoryStorage,
+  fileFilter: createFileFilter("image+video"),
+  limits: { fileSize: 100 * 1024 * 1024 },
+}).fields([
+  { name: "heroImage", maxCount: 1 },
+  { name: "overviewImage", maxCount: 1 },
+  { name: "architectureImage1", maxCount: 1 },
+  { name: "architectureImage2", maxCount: 1 },
+  { name: "mapImage", maxCount: 1 },
+  { name: "videoThumbnail", maxCount: 1 },
+  { name: "galleryImages", maxCount: 20 },
+]);
+
 export const uploadsquareCityVideoFiles = createUploadMiddleware({ fieldName: "squareCityVideo", fileType: "image+video" });
 export const uploadNewsEventFiles = createUploadMiddleware({ fieldName: ["image"], fileType: "image" });
 export const uploadProjectFiles = createUploadMiddleware({ fieldName: ["image","slideImage","galleryImages","projectGalleryImages","mapLocation","basement","groundFloor","typicalFloor","roofFloor","brochure"], fileType: "image+pdf" });
