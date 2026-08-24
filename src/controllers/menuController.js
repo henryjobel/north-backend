@@ -11,7 +11,8 @@ const defaultConcernMenuItems = [
   { key: "static-northsouth-farms-ltd", concernSlug: "northsouth-farms-ltd", label: "Northsouth Farms Ltd.", to: "/northsouthFarmsLtd", sortOrder: 7 },
   { key: "static-northsouth-garments", concernSlug: "northsouth-garments", label: "Northsouth Garments", to: "/northsouthGarments", sortOrder: 8 },
   { key: "static-dailyadin", label: "Daily Adin Press Media Ltd.", href: "https://www.dailyadin.com/", external: true, sortOrder: 9 },
-  { key: "static-titanic-bay-hotel-resort-ltd", label: "Titanic Bay Hotel & Resort Ltd.", href: "https://www.titanicbay.com/", external: true, sortOrder: 10 },
+  { key: "static-dailyadin-newspaper", label: "Daily Adin (NewsPaper)", href: "https://www.dailyadin.com/", external: true, sortOrder: 10 },
+  { key: "static-titanic-bay-hotel-resort-ltd", label: "Titanic Bay Hotel & Resort Ltd.", href: "https://www.titanicbay.com/", external: true, sortOrder: 11 },
 ];
 
 let seedPromise = null;

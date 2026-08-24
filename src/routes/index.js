@@ -15,6 +15,7 @@ import { plotBookingRoutes } from "./plotBookingRoutes.js";
 import { concernRoutes } from "./concernRoutes.js";
 import { menuRoutes } from "./menuRoutes.js";
 import { commercialProjectRoutes } from "./commercialProjectRoutes.js";
+import { homeSliderRoutes } from "./homeSliderRoutes.js";
 
 const router = Router();
 
@@ -35,6 +36,6 @@ router.use("/plotBooking", plotBookingRoutes);
 router.use("/concern", concernRoutes);
 router.use("/menu", menuRoutes);
 router.use("/commercialProject", commercialProjectRoutes);
-
+router.use("/homeSlider", homeSliderRoutes);
 
 export default router;

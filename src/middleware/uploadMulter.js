@@ -116,6 +116,9 @@ export const uploadCommercialProjectAllFiles = multer({
   { name: "galleryImages", maxCount: 20 },
 ]);
 
+export const uploadHomeSlider = createUploadMiddleware({ fieldName: "image", fileType: "image", fileSizeLimit: 20 });
+
+
 export const uploadsquareCityVideoFiles = createUploadMiddleware({ fieldName: "squareCityVideo", fileType: "image+video" });
 export const uploadNewsEventFiles = createUploadMiddleware({ fieldName: ["image"], fileType: "image" });
 export const uploadProjectFiles = createUploadMiddleware({ fieldName: ["image","slideImage","galleryImages","projectGalleryImages","mapLocation","basement","groundFloor","typicalFloor","roofFloor","brochure"], fileType: "image+pdf" });
