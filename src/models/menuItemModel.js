@@ -18,7 +18,7 @@ const menuItemSchema = new mongoose.Schema(
     sortOrder: { type: Number, default: 0 },
     source: {
       type: String,
-      enum: ["static", "concern"],
+      enum: ["static", "concern", "custom"],
       default: "static",
     },
   },

@@ -163,3 +163,42 @@ export const reorderConcernMenuItems = async (req, res) => {
     res.status(400).json({ status: "fail", message: err.message });
   }
 };
+
+export const addCustomMenuItem = async (req, res) => {
+  try {
+    const { label, url, external } = req.body;
+    if (!label || !url) {
+      return res.status(400).json({ status: "fail", message: "Label and URL are required" });
+    }
+    
+    const key = `custom-${Date.now()}`;
+    const maxOrderItem = await MenuItem.findOne().sort({ sortOrder: -1 }).select("sortOrder").lean();
+    const sortOrder = (maxOrderItem?.sortOrder || 0) + 1;
+
+    await MenuItem.create({
+      key,
+      label,
+      [external ? 'href' : 'to']: url,
+      external: !!external,
+      isVisible: true,
+      sortOrder,
+      source: "custom"
+    });
+
+    const menuItems = await sortMenuItems();
+    res.status(201).json({ status: "success", data: menuItems });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+export const deleteCustomMenuItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await MenuItem.findByIdAndDelete(id);
+    const menuItems = await sortMenuItems();
+    res.status(200).json({ status: "success", data: menuItems });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
