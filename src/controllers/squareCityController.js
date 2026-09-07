@@ -122,6 +122,8 @@ export const createSquareCity = async (req, res) => {
     if (files?.squareCityVideo?.[0]) {
       const result = await uploadToCloudinary(files.squareCityVideo[0].buffer, "squareCity", { resource_type: "auto" });
       data.squareCityVideo = result.url;
+    } else if (body.squareCityVideo) {
+      data.squareCityVideo = body.squareCityVideo.trim();
     }
 
     if (files?.galleryImages?.length) {
@@ -219,11 +221,20 @@ export const updateSquareCity = async (req, res) => {
     const updateData = normalizeSquareCityBody(body);
 
     if (files?.squareCityVideo?.[0]) {
-      if (squareCity.squareCityVideo) {
+      if (squareCity.squareCityVideo && squareCity.squareCityVideo.includes("res.cloudinary.com")) {
         await deleteFromCloudinary(getPublicIdFromUrl(squareCity.squareCityVideo), "video");
       }
       const result = await uploadToCloudinary(files.squareCityVideo[0].buffer, "squareCity", { resource_type: "auto" });
       updateData.squareCityVideo = result.url;
+    } else if (body.squareCityVideo !== undefined) {
+      if (
+        squareCity.squareCityVideo &&
+        squareCity.squareCityVideo !== body.squareCityVideo &&
+        squareCity.squareCityVideo.includes("res.cloudinary.com")
+      ) {
+        await deleteFromCloudinary(getPublicIdFromUrl(squareCity.squareCityVideo), "video");
+      }
+      updateData.squareCityVideo = body.squareCityVideo ? body.squareCityVideo.trim() : "";
     }
 
     if (files?.galleryImages?.length) {
@@ -302,7 +313,7 @@ export const deleteSquareCity = async (req, res) => {
     const squareCity = await SquareCity.findById(req.params.id);
     if (!squareCity) return res.status(404).json({ status: "fail", message: "Square City not found" });
 
-    if (squareCity.squareCityVideo) {
+    if (squareCity.squareCityVideo && squareCity.squareCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(squareCity.squareCityVideo), "video");
     }
     if (squareCity.galleryImages?.length) {
