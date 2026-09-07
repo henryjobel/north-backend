@@ -118,10 +118,12 @@ export const createGreenCity = async (req, res) => {
     const { body, files } = req;
     const data = normalizeGreenCityBody(body);
 
-    // Video
+    // Video (file upload or direct/YouTube URL)
     if (files?.greenCityVideo?.[0]) {
       const result = await uploadToCloudinary(files.greenCityVideo[0].buffer, "greenCity", { resource_type: "auto" });
       data.greenCityVideo = result.url;
+    } else if (body.greenCityVideo) {
+      data.greenCityVideo = body.greenCityVideo.trim();
     }
 
     // Gallery images
@@ -220,13 +222,22 @@ export const updateGreenCity = async (req, res) => {
 
     const updateData = normalizeGreenCityBody(body);
 
-    // Video
+    // Video (file upload, YouTube/direct link, or clear)
     if (files?.greenCityVideo?.[0]) {
-      if (greenCity.greenCityVideo) {
+      if (greenCity.greenCityVideo && greenCity.greenCityVideo.includes("res.cloudinary.com")) {
         await deleteFromCloudinary(getPublicIdFromUrl(greenCity.greenCityVideo), "video");
       }
       const result = await uploadToCloudinary(files.greenCityVideo[0].buffer, "greenCity", { resource_type: "auto" });
       updateData.greenCityVideo = result.url;
+    } else if (body.greenCityVideo !== undefined) {
+      if (
+        greenCity.greenCityVideo &&
+        greenCity.greenCityVideo !== body.greenCityVideo &&
+        greenCity.greenCityVideo.includes("res.cloudinary.com")
+      ) {
+        await deleteFromCloudinary(getPublicIdFromUrl(greenCity.greenCityVideo), "video");
+      }
+      updateData.greenCityVideo = body.greenCityVideo ? body.greenCityVideo.trim() : "";
     }
 
     // Gallery images – replace all if new ones uploaded
@@ -310,7 +321,7 @@ export const deleteGreenCity = async (req, res) => {
     const greenCity = await GreenCity.findById(req.params.id);
     if (!greenCity) return res.status(404).json({ status: "fail", message: "Green City not found" });
 
-    if (greenCity.greenCityVideo) {
+    if (greenCity.greenCityVideo && greenCity.greenCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(greenCity.greenCityVideo), "video");
     }
     if (greenCity.galleryImages?.length) {
