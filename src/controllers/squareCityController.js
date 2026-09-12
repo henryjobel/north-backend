@@ -26,7 +26,7 @@ const parseJsonField = (data, key) => {
 
 const normalizeSquareCityBody = (body) => {
   const data = { ...body };
-  ["goals", "locationHighlights", "plotTabs", "videoGallery"].forEach((key) =>
+  ["goals", "locationHighlights", "plotTabs", "videoGallery", "existingGalleryImages"].forEach((key) =>
     parseJsonField(data, key)
   );
   return data;
@@ -115,6 +115,23 @@ const deleteRemovedVideoGalleryUploads = async (currentItems = [], nextItems = [
   const nextPublicIds = new Set(nextItems.map((item) => item?.public_id).filter(Boolean));
   await deleteVideoGalleryUploads(
     currentItems.filter((item) => item?.public_id && !nextPublicIds.has(item.public_id))
+  );
+};
+
+const normalizeExistingGalleryImages = (items = []) =>
+  items
+    .map((item) => ({
+      public_id: item?.public_id || "",
+      url: item?.url || "",
+    }))
+    .filter((item) => item.url);
+
+const deleteRemovedGalleryImages = async (currentItems = [], nextItems = []) => {
+  const nextPublicIds = new Set(nextItems.map((item) => item?.public_id).filter(Boolean));
+  await Promise.all(
+    currentItems
+      .filter((item) => item?.public_id && !nextPublicIds.has(item.public_id))
+      .map((item) => deleteFromCloudinary(item.public_id))
   );
 };
 
@@ -289,12 +306,16 @@ export const updateSquareCity = async (req, res) => {
       updateData.videoGallery = nextVideoGallery;
     }
 
-    if (files?.galleryImages?.length) {
-      if (squareCity.galleryImages?.length) {
-        await Promise.all(squareCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id)));
-      }
-      updateData.galleryImages = await uploadGalleryImages(files.galleryImages, "squareCity/gallery");
+    if (body.existingGalleryImages !== undefined || files?.galleryImages?.length) {
+      const keptGalleryImages =
+        body.existingGalleryImages !== undefined
+          ? normalizeExistingGalleryImages(updateData.existingGalleryImages)
+          : squareCity.galleryImages || [];
+      await deleteRemovedGalleryImages(squareCity.galleryImages, keptGalleryImages);
+      const newGalleryImages = await uploadGalleryImages(files.galleryImages, "squareCity/gallery");
+      updateData.galleryImages = [...keptGalleryImages, ...newGalleryImages];
     }
+    delete updateData.existingGalleryImages;
 
     if (files?.brochureImage?.[0]) {
       if (squareCity.brochureImage?.public_id) {
