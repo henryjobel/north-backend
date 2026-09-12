@@ -179,6 +179,13 @@ export const createSquareCity = async (req, res) => {
       data.squareCityVideo = body.squareCityVideo.trim();
     }
 
+    if (files?.locationTourVideo?.[0]) {
+      const result = await uploadToCloudinary(files.locationTourVideo[0].buffer, "squareCity/locationTour", { resource_type: "auto" });
+      data.locationTourVideo = result.url;
+    } else if (body.locationTourVideo) {
+      data.locationTourVideo = body.locationTourVideo.trim();
+    }
+
     data.videoGallery = await buildVideoGallery(
       Array.isArray(data.videoGallery) ? data.videoGallery : [],
       files?.videoGalleryVideos || [],
@@ -296,6 +303,23 @@ export const updateSquareCity = async (req, res) => {
       updateData.squareCityVideo = body.squareCityVideo ? body.squareCityVideo.trim() : "";
     }
 
+    if (files?.locationTourVideo?.[0]) {
+      if (squareCity.locationTourVideo && squareCity.locationTourVideo.includes("res.cloudinary.com")) {
+        await deleteFromCloudinary(getPublicIdFromUrl(squareCity.locationTourVideo), "video");
+      }
+      const result = await uploadToCloudinary(files.locationTourVideo[0].buffer, "squareCity/locationTour", { resource_type: "auto" });
+      updateData.locationTourVideo = result.url;
+    } else if (body.locationTourVideo !== undefined) {
+      if (
+        squareCity.locationTourVideo &&
+        squareCity.locationTourVideo !== body.locationTourVideo &&
+        squareCity.locationTourVideo.includes("res.cloudinary.com")
+      ) {
+        await deleteFromCloudinary(getPublicIdFromUrl(squareCity.locationTourVideo), "video");
+      }
+      updateData.locationTourVideo = body.locationTourVideo ? body.locationTourVideo.trim() : "";
+    }
+
     if (body.videoGallery !== undefined || files?.videoGalleryVideos?.length) {
       const nextVideoGallery = await buildVideoGallery(
         Array.isArray(updateData.videoGallery) ? updateData.videoGallery : [],
@@ -388,6 +412,9 @@ export const deleteSquareCity = async (req, res) => {
 
     if (squareCity.squareCityVideo && squareCity.squareCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(squareCity.squareCityVideo), "video");
+    }
+    if (squareCity.locationTourVideo && squareCity.locationTourVideo.includes("res.cloudinary.com")) {
+      await deleteFromCloudinary(getPublicIdFromUrl(squareCity.locationTourVideo), "video");
     }
     await deleteVideoGalleryUploads(squareCity.videoGallery);
     if (squareCity.galleryImages?.length) {

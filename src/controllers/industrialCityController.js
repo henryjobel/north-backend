@@ -178,6 +178,13 @@ export const createIndustrialCity = async (req, res) => {
       data.industrialCityVideo = body.industrialCityVideo.trim();
     }
 
+    if (files?.locationTourVideo?.[0]) {
+      const result = await uploadToCloudinary(files.locationTourVideo[0].buffer, "industrialCity/locationTour", { resource_type: "auto" });
+      data.locationTourVideo = result.url;
+    } else if (body.locationTourVideo) {
+      data.locationTourVideo = body.locationTourVideo.trim();
+    }
+
     data.videoGallery = await buildVideoGallery(
       Array.isArray(data.videoGallery) ? data.videoGallery : [],
       files?.videoGalleryVideos || [],
@@ -295,6 +302,23 @@ export const updateIndustrialCity = async (req, res) => {
       updateData.industrialCityVideo = body.industrialCityVideo ? body.industrialCityVideo.trim() : "";
     }
 
+    if (files?.locationTourVideo?.[0]) {
+      if (industrialCity.locationTourVideo && industrialCity.locationTourVideo.includes("res.cloudinary.com")) {
+        await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.locationTourVideo), "video");
+      }
+      const result = await uploadToCloudinary(files.locationTourVideo[0].buffer, "industrialCity/locationTour", { resource_type: "auto" });
+      updateData.locationTourVideo = result.url;
+    } else if (body.locationTourVideo !== undefined) {
+      if (
+        industrialCity.locationTourVideo &&
+        industrialCity.locationTourVideo !== body.locationTourVideo &&
+        industrialCity.locationTourVideo.includes("res.cloudinary.com")
+      ) {
+        await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.locationTourVideo), "video");
+      }
+      updateData.locationTourVideo = body.locationTourVideo ? body.locationTourVideo.trim() : "";
+    }
+
     if (body.videoGallery !== undefined || files?.videoGalleryVideos?.length) {
       const nextVideoGallery = await buildVideoGallery(
         Array.isArray(updateData.videoGallery) ? updateData.videoGallery : [],
@@ -387,6 +411,9 @@ export const deleteIndustrialCity = async (req, res) => {
 
     if (industrialCity.industrialCityVideo && industrialCity.industrialCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.industrialCityVideo), "video");
+    }
+    if (industrialCity.locationTourVideo && industrialCity.locationTourVideo.includes("res.cloudinary.com")) {
+      await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.locationTourVideo), "video");
     }
     await deleteVideoGalleryUploads(industrialCity.videoGallery);
     if (industrialCity.galleryImages?.length) {

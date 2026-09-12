@@ -65,6 +65,7 @@ export const uploadSquareCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "squareCityVideo", maxCount: 1 },
+  { name: "locationTourVideo", maxCount: 1 },
   { name: "videoGalleryVideos", maxCount: cityGalleryVideoMaxCount },
   { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },
@@ -81,6 +82,7 @@ export const uploadIndustrialCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "industrialCityVideo", maxCount: 1 },
+  { name: "locationTourVideo", maxCount: 1 },
   { name: "videoGalleryVideos", maxCount: cityGalleryVideoMaxCount },
   { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },
@@ -97,6 +99,7 @@ export const uploadGreenCityAllFiles = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 }).fields([
   { name: "greenCityVideo", maxCount: 1 },
+  { name: "locationTourVideo", maxCount: 1 },
   { name: "videoGalleryVideos", maxCount: cityGalleryVideoMaxCount },
   { name: "galleryImages", maxCount: cityGalleryImageMaxCount },
   { name: "brochureImage", maxCount: 1 },

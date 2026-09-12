@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const squareCitySchema = new mongoose.Schema(
   {
     squareCityVideo: { type: String, default: "" },
+    locationTourVideo: { type: String, default: "" },
     videoGallery: [
       {
         label: { type: String, default: "" },
