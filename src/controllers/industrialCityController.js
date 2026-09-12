@@ -14,7 +14,7 @@ const parseJsonField = (data, key) => {
 
 const normalizeIndustrialCityBody = (body) => {
   const data = { ...body };
-  ["goals", "locationHighlights", "plotTabs"].forEach((key) =>
+  ["goals", "locationHighlights", "plotTabs", "videoGallery"].forEach((key) =>
     parseJsonField(data, key)
   );
   return data;
@@ -81,6 +81,42 @@ const uploadGalleryImages = async (files = [], folder) => {
   return uploaded;
 };
 
+const buildVideoGallery = async (items = [], files = [], folder) => {
+  const uploadedFiles = [];
+  for (const file of files) {
+    const result = await uploadToCloudinary(file.buffer, folder, { resource_type: "auto" });
+    uploadedFiles.push({ url: result.url, public_id: result.public_id || "" });
+  }
+
+  return items
+    .map((item, index) => {
+      const uploaded = Number.isInteger(item?.fileIndex) ? uploadedFiles[item.fileIndex] : null;
+      const url = uploaded?.url || item?.url || "";
+      return {
+        label: item?.label || `Video ${index + 1}`,
+        url: typeof url === "string" ? url.trim() : "",
+        public_id: uploaded?.public_id || item?.public_id || "",
+      };
+    })
+    .filter((item) => item.url);
+};
+
+const deleteVideoGalleryUploads = async (items = []) => {
+  await Promise.all(
+    items
+      .map((item) => item?.public_id)
+      .filter(Boolean)
+      .map((publicId) => deleteFromCloudinary(publicId, "video"))
+  );
+};
+
+const deleteRemovedVideoGalleryUploads = async (currentItems = [], nextItems = []) => {
+  const nextPublicIds = new Set(nextItems.map((item) => item?.public_id).filter(Boolean));
+  await deleteVideoGalleryUploads(
+    currentItems.filter((item) => item?.public_id && !nextPublicIds.has(item.public_id))
+  );
+};
+
 const uploadSectionImages = async (files, currentSectionImages = {}) => {
   const uploadedSectionImages = {};
 
@@ -121,7 +157,15 @@ export const createIndustrialCity = async (req, res) => {
     if (files?.industrialCityVideo?.[0]) {
       const result = await uploadToCloudinary(files.industrialCityVideo[0].buffer, "industrialCity", { resource_type: "auto" });
       data.industrialCityVideo = result.url;
+    } else if (body.industrialCityVideo) {
+      data.industrialCityVideo = body.industrialCityVideo.trim();
     }
+
+    data.videoGallery = await buildVideoGallery(
+      Array.isArray(data.videoGallery) ? data.videoGallery : [],
+      files?.videoGalleryVideos || [],
+      "industrialCity/videoGallery"
+    );
 
     if (files?.galleryImages?.length) {
       data.galleryImages = await uploadGalleryImages(files.galleryImages, "industrialCity/gallery");
@@ -218,11 +262,30 @@ export const updateIndustrialCity = async (req, res) => {
     const updateData = normalizeIndustrialCityBody(body);
 
     if (files?.industrialCityVideo?.[0]) {
-      if (industrialCity.industrialCityVideo) {
+      if (industrialCity.industrialCityVideo && industrialCity.industrialCityVideo.includes("res.cloudinary.com")) {
         await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.industrialCityVideo), "video");
       }
       const result = await uploadToCloudinary(files.industrialCityVideo[0].buffer, "industrialCity", { resource_type: "auto" });
       updateData.industrialCityVideo = result.url;
+    } else if (body.industrialCityVideo !== undefined) {
+      if (
+        industrialCity.industrialCityVideo &&
+        industrialCity.industrialCityVideo !== body.industrialCityVideo &&
+        industrialCity.industrialCityVideo.includes("res.cloudinary.com")
+      ) {
+        await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.industrialCityVideo), "video");
+      }
+      updateData.industrialCityVideo = body.industrialCityVideo ? body.industrialCityVideo.trim() : "";
+    }
+
+    if (body.videoGallery !== undefined || files?.videoGalleryVideos?.length) {
+      const nextVideoGallery = await buildVideoGallery(
+        Array.isArray(updateData.videoGallery) ? updateData.videoGallery : [],
+        files?.videoGalleryVideos || [],
+        "industrialCity/videoGallery"
+      );
+      await deleteRemovedVideoGalleryUploads(industrialCity.videoGallery, nextVideoGallery);
+      updateData.videoGallery = nextVideoGallery;
     }
 
     if (files?.galleryImages?.length) {
@@ -301,9 +364,10 @@ export const deleteIndustrialCity = async (req, res) => {
     const industrialCity = await IndustrialCity.findById(req.params.id);
     if (!industrialCity) return res.status(404).json({ status: "fail", message: "Industrial City not found" });
 
-    if (industrialCity.industrialCityVideo) {
+    if (industrialCity.industrialCityVideo && industrialCity.industrialCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(industrialCity.industrialCityVideo), "video");
     }
+    await deleteVideoGalleryUploads(industrialCity.videoGallery);
     if (industrialCity.galleryImages?.length) {
       await Promise.all(industrialCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id)));
     }

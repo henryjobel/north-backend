@@ -3,6 +3,13 @@ import mongoose from "mongoose";
 const industrialCitySchema = new mongoose.Schema(
   {
     industrialCityVideo: { type: String, default: "" },
+    videoGallery: [
+      {
+        label: { type: String, default: "" },
+        url: { type: String, default: "" },
+        public_id: { type: String, default: "" },
+      },
+    ],
 
     heroEyebrow: { type: String, default: "" },
     heroTitle: { type: String, default: "" },

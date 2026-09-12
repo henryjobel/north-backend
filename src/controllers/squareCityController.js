@@ -26,7 +26,7 @@ const parseJsonField = (data, key) => {
 
 const normalizeSquareCityBody = (body) => {
   const data = { ...body };
-  ["goals", "locationHighlights", "plotTabs"].forEach((key) =>
+  ["goals", "locationHighlights", "plotTabs", "videoGallery"].forEach((key) =>
     parseJsonField(data, key)
   );
   return data;
@@ -82,6 +82,42 @@ const uploadGalleryImages = async (files = [], folder) => {
   return uploaded;
 };
 
+const buildVideoGallery = async (items = [], files = [], folder) => {
+  const uploadedFiles = [];
+  for (const file of files) {
+    const result = await uploadToCloudinary(file.buffer, folder, { resource_type: "auto" });
+    uploadedFiles.push({ url: result.url, public_id: result.public_id || "" });
+  }
+
+  return items
+    .map((item, index) => {
+      const uploaded = Number.isInteger(item?.fileIndex) ? uploadedFiles[item.fileIndex] : null;
+      const url = uploaded?.url || item?.url || "";
+      return {
+        label: item?.label || `Video ${index + 1}`,
+        url: typeof url === "string" ? url.trim() : "",
+        public_id: uploaded?.public_id || item?.public_id || "",
+      };
+    })
+    .filter((item) => item.url);
+};
+
+const deleteVideoGalleryUploads = async (items = []) => {
+  await Promise.all(
+    items
+      .map((item) => item?.public_id)
+      .filter(Boolean)
+      .map((publicId) => deleteFromCloudinary(publicId, "video"))
+  );
+};
+
+const deleteRemovedVideoGalleryUploads = async (currentItems = [], nextItems = []) => {
+  const nextPublicIds = new Set(nextItems.map((item) => item?.public_id).filter(Boolean));
+  await deleteVideoGalleryUploads(
+    currentItems.filter((item) => item?.public_id && !nextPublicIds.has(item.public_id))
+  );
+};
+
 const uploadSectionImages = async (files, currentSectionImages = {}) => {
   const uploadedSectionImages = {};
 
@@ -125,6 +161,12 @@ export const createSquareCity = async (req, res) => {
     } else if (body.squareCityVideo) {
       data.squareCityVideo = body.squareCityVideo.trim();
     }
+
+    data.videoGallery = await buildVideoGallery(
+      Array.isArray(data.videoGallery) ? data.videoGallery : [],
+      files?.videoGalleryVideos || [],
+      "squareCity/videoGallery"
+    );
 
     if (files?.galleryImages?.length) {
       data.galleryImages = await uploadGalleryImages(files.galleryImages, "squareCity/gallery");
@@ -237,6 +279,16 @@ export const updateSquareCity = async (req, res) => {
       updateData.squareCityVideo = body.squareCityVideo ? body.squareCityVideo.trim() : "";
     }
 
+    if (body.videoGallery !== undefined || files?.videoGalleryVideos?.length) {
+      const nextVideoGallery = await buildVideoGallery(
+        Array.isArray(updateData.videoGallery) ? updateData.videoGallery : [],
+        files?.videoGalleryVideos || [],
+        "squareCity/videoGallery"
+      );
+      await deleteRemovedVideoGalleryUploads(squareCity.videoGallery, nextVideoGallery);
+      updateData.videoGallery = nextVideoGallery;
+    }
+
     if (files?.galleryImages?.length) {
       if (squareCity.galleryImages?.length) {
         await Promise.all(squareCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id)));
@@ -316,6 +368,7 @@ export const deleteSquareCity = async (req, res) => {
     if (squareCity.squareCityVideo && squareCity.squareCityVideo.includes("res.cloudinary.com")) {
       await deleteFromCloudinary(getPublicIdFromUrl(squareCity.squareCityVideo), "video");
     }
+    await deleteVideoGalleryUploads(squareCity.videoGallery);
     if (squareCity.galleryImages?.length) {
       await Promise.all(squareCity.galleryImages.map((img) => deleteFromCloudinary(img.public_id)));
     }
