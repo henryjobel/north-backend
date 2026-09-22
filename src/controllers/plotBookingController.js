@@ -4,13 +4,14 @@ import {PlotBooking} from "../models/plotBookingModel.js";
 // POST /api/plot-booking
 export const createPlotBooking = async (req, res) => {
   try {
-    const { name, block, address, road, phone, plotNo, email, size } = req.body;
+    const { projectName, project, sourceProject, name, block, address, road, phone, plotNo, email, size } = req.body;
 
     if (!name || !block || !address || !phone || !size) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
     const newBooking = await PlotBooking.create({
+      projectName: projectName || project || sourceProject || "Unknown project",
       name,
       block,
       address,

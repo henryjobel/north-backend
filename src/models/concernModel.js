@@ -17,6 +17,20 @@ const statSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const sectionSchema = new mongoose.Schema(
+  {
+    type: { type: String, enum: ["text", "image-text", "cards", "quote", "gallery", "cta"], default: "text" },
+    title: { type: String, trim: true },
+    eyebrow: { type: String, trim: true },
+    text: { type: String, trim: true },
+    image: { type: String, trim: true },
+    buttonLabel: { type: String, trim: true },
+    buttonUrl: { type: String, trim: true },
+    items: [cardSchema],
+  },
+  { _id: true }
+);
+
 const concernSchema = new mongoose.Schema(
   {
     slug: {
@@ -54,6 +68,7 @@ const concernSchema = new mongoose.Schema(
     processItems: [{ type: String, trim: true }],
     heroSliderImages: [{ type: String, trim: true }],
     galleryImages: [{ type: String, trim: true }],
+    sections: [sectionSchema],
     ctaTitle: { type: String, trim: true },
     ctaText: { type: String, trim: true },
     ctaLabel: { type: String, trim: true },

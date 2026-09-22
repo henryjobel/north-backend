@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const plotBookingSchema = new mongoose.Schema(
   {
+    projectName: { type: String, trim: true, default: "Unknown project" },
     name: { type: String, required: true, trim: true },
     block: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },
