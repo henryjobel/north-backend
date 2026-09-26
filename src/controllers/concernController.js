@@ -60,7 +60,7 @@ const isPlainObject = (value) => {
 
 const normalizeLtdText = (value, key = "") => {
   if (skipLtdNormalizeKeys.has(key)) return value;
-  if (typeof value === "string") return value.replace(/\bltd\b/gi, "Ltd.");
+  if (typeof value === "string") return value.replace(/\bltd\b\.*(?!\w)/gi, "Ltd.");
   if (Array.isArray(value)) return value.map((entry) => normalizeLtdText(entry, key));
   if (isPlainObject(value)) {
     return Object.fromEntries(
@@ -85,7 +85,8 @@ const normalizeRoutePath = (value = "") => {
 };
 
 const normalizeConcernPayload = (payload) => {
-  const next = { ...payload };
+  const next = normalizeLtdText({ ...payload });
+  ["_id", "id", "__v", "createdAt", "updatedAt"].forEach((field) => delete next[field]);
   if (next.slug) next.slug = slugify(next.slug);
   if (next.routePath) next.routePath = normalizeRoutePath(next.routePath);
   if (!next.routePath && next.slug) next.routePath = `/concern/${next.slug}`;

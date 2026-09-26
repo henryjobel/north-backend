@@ -27,3 +27,5 @@ src/uploads
 *.sln
 *.sw?
 .vercel
+tmp/*
+!tmp/.gitkeep

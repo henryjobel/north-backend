@@ -12,6 +12,7 @@ import { MONGO_URI, PORT } from "./config/siteEnv.js";
 dns.setDefaultResultOrder("ipv4first");
 
 let server;
+const port = Number.parseInt(PORT, 10) || 8000;
 
 // Connect to MongoDB
 mongoose
@@ -22,8 +23,8 @@ mongoose
   })
   .then(() => {
     console.log("DB Connected!");
-    server = app.listen(PORT, () =>
-      console.log(`Server started on port ${PORT}`)
+    server = app.listen(port, "0.0.0.0", () =>
+      console.log(`Server started on port ${port}`)
     );
   })
   .catch((err) => {

@@ -9,9 +9,31 @@ import mongoose from "mongoose";
 import globalErrorHandler from "./controllers/errorController.js";
 import AppRoutes from "./routes/index.js";
 import AppError from "./utils/appError.js";
-import { MONGO_URI } from "./config/siteEnv.js";
+import { CORS_ORIGINS, FRONTEND_URL, MONGO_URI, NODE_ENV } from "./config/siteEnv.js";
 
 const app = express();
+
+const allowedOrigins = String(CORS_ORIGINS || FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+const corsOptions = {
+  credentials: true,
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    const isLocalDevelopment =
+      NODE_ENV !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
+
+    if (allowedOrigins.includes(normalizedOrigin) || isLocalDevelopment) {
+      return callback(null, true);
+    }
+
+    return callback(new AppError(`Origin ${origin} is not allowed by CORS`, 403));
+  },
+};
 
 // Trust nginx reverse proxy — required so req.ip gives the real client IP
 // Without this, all requests appear to come from 127.0.0.1 (nginx) and
@@ -57,7 +79,7 @@ app.use(
 );
 
 const options = [
-  cors({ origin: true, credentials: true }),
+  cors(corsOptions),
   express.json({ limit: "30mb" }),
   morgan("dev"),
   compression({
