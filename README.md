@@ -7,7 +7,7 @@ Express and MongoDB API prepared for local development and cPanel Passenger depl
 - Node.js 20.9 or newer (Node.js 20 or 22 recommended)
 - npm
 - MongoDB Atlas or another remotely accessible MongoDB server
-- Cloudinary account
+- Cloudinary accountasda
 
 ## Local development
 
