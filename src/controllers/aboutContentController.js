@@ -16,11 +16,19 @@ const normalizePayload = (body = {}) => ({
   strengths: normalizeCards(body.strengths),
   leaders: normalizeCards(body.leaders),
   csrImages: normalizeCards(body.csrImages),
+  officeImages: normalizeCards(body.officeImages),
+  officeGalleryImages: normalizeCards(body.officeGalleryImages),
+  mediaImages: normalizeCards(body.mediaImages),
   missionCards: normalizeCards(body.missionCards),
 });
 
 export const getAboutContent = async (_req, res) => {
   try {
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    });
     let content = await AboutContent.findOne();
     if (!content) {
       content = await AboutContent.create({});

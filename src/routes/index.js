@@ -16,6 +16,7 @@ import { concernRoutes } from "./concernRoutes.js";
 import { menuRoutes } from "./menuRoutes.js";
 import { commercialProjectRoutes } from "./commercialProjectRoutes.js";
 import { homeSliderRoutes } from "./homeSliderRoutes.js";
+import { footerRoutes } from "./footerRoutes.js";
 
 const router = Router();
 
@@ -37,5 +38,6 @@ router.use("/concern", concernRoutes);
 router.use("/menu", menuRoutes);
 router.use("/commercialProject", commercialProjectRoutes);
 router.use("/homeSlider", homeSliderRoutes);
+router.use("/footer", footerRoutes);
 
 export default router;

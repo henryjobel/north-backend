@@ -24,8 +24,8 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     const normalizedOrigin = origin.replace(/\/$/, "");
-    const isLocalDevelopment =
-      NODE_ENV !== "production" && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
+    // Local frontend development can still use a production-configured API.
+    const isLocalDevelopment = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
 
     if (allowedOrigins.includes(normalizedOrigin) || isLocalDevelopment) {
       return callback(null, true);
