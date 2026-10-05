@@ -69,6 +69,8 @@ const aboutContentSchema = new mongoose.Schema(
         "Since our inception in 2019, we have worked to address housing and accommodation challenges around Dhaka through diverse residential and industrial projects.",
     },
     overviewBadge: { type: String, default: "Since 2019" },
+    overviewImage: { type: String, default: "" },
+    overviewSecondImage: { type: String, default: "" },
     overviewHighlightEyebrow: { type: String, default: "North South Group" },
     overviewHighlightTitle: {
       type: String,
