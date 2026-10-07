@@ -17,6 +17,7 @@ import { menuRoutes } from "./menuRoutes.js";
 import { commercialProjectRoutes } from "./commercialProjectRoutes.js";
 import { homeSliderRoutes } from "./homeSliderRoutes.js";
 import { footerRoutes } from "./footerRoutes.js";
+import { homeContentRoutes } from "./homeContentRoutes.js";
 
 const router = Router();
 
@@ -39,5 +40,6 @@ router.use("/menu", menuRoutes);
 router.use("/commercialProject", commercialProjectRoutes);
 router.use("/homeSlider", homeSliderRoutes);
 router.use("/footer", footerRoutes);
+router.use("/homeContent", homeContentRoutes);
 
 export default router;
