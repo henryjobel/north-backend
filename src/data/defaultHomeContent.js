@@ -49,6 +49,7 @@ export const defaultHomeContent = {
     openTitle: "North South Gallery",
     exploreLabel: "Explore",
     albumLabel: "Open Gallery",
+    albums: [],
   },
   meeting: {
     title: "Schedule a Meeting",
